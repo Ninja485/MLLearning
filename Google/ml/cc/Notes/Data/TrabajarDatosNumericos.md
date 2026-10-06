@@ -128,7 +128,7 @@ Se basa en principalmente detectar una cota superior e inferior de la distribuci
 El recorte evita que tu modelo se sobreindexe en datos sin importancia. Sin embargo, algunos valores atípicos son importantes, por lo que debes recortar los valores con cuidado.
 
 ### Resumen de las técnicas de normalización
-![](Normalizacion.PNG)
+![](Images/Normalizacion.PNG)
 
 ## Discretización
 
@@ -150,11 +150,11 @@ El agrupamiento en cuantiles crea límites de agrupamiento, de modo que la canti
 
 Para ilustrar el problema que resuelve el agrupamiento en cuantiles, considera buckets espaciados igual que se muestra en la siguiente figura, donde cada de los diez buckets representa un intervalo de exactamente 10,000 dólares. Observa que el bucket de 0 a 10,000 contiene decenas de ejemplos pero el bucket de 50,000 a 60,000 contiene solo 5 ejemplos. Por lo tanto, el modelo tiene suficientes ejemplos para entrenar en el rango de 0 a 10,000 pero no hay suficientes ejemplos para entrenar en el bucket de 50,000 a 60,000.
 
-![](NeedsQuantileBucketing.png)
+![](Images/NeedsQuantileBucketing.png)
 
 En cambio, la siguiente figura utiliza el agrupamiento en cuantiles para dividir los precios de los automóviles en discretizaciones con aproximadamente la misma cantidad de ejemplos en cada intervalo. Ten en cuenta que algunas discretizaciones abarcan un intervalo de precios limitado, mientras que otras abarcan un intervalo de precios muy amplio.
 
-![](QuantileBucketing.png)
+![](Images/QuantileBucketing.png)
 
 El agrupamiento con intervalos iguales funciona para muchos datos distribuciones. Para los datos sesgados, pero puedes probar el agrupamiento en cuantiles. Los intervalos iguales dan más espacio de información hasta la cola larga mientras se compacta el gran torso. en un solo bucket. Los buckets cuantiles brindan espacio de información adicional al con un torso grande y se compacta la cola larga en una sola cubeta.
 
