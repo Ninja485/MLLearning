@@ -33,7 +33,7 @@ Cuando un atributo categórico tiene una cantidad baja de categorías posibles, 
 
 Los modelos de aprendizaje automático solo pueden manipular números de punto flotante. Por lo tanto, debes convertir cada cadena en un número de índice único, como se muestra en la siguiente ilustración:
 
-![](categorical-netview-indexed.png)
+![](Images/categorical-netview-indexed.png)
 
 Después de convertir las cadenas en números de índice únicos, deberás procesar los datos aún más para representarlos de maneras que ayuden al modelo a aprender relaciones significativas entre los valores. Si los datos de atributos categóricos se dejan como números enteros indexados y se cargan en un modelo, este tratará los valores indexados como números de punto flotante continuos. Luego, el modelo consideraría que "púrpura" es seis veces más probable que "naranja".
 
