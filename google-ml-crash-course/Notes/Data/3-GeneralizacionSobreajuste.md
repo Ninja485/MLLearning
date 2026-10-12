@@ -73,7 +73,7 @@ Los algoritmos inteligentes pueden imputar algunos valores faltantes bastante bu
 
 La imputación es el proceso de generar datos bien fundamentados, no datos aleatorios ni engañosos. Ten cuidado: una buena imputación puede mejorar tu modelo, mientras que una mala puede perjudicarlo.
 
-Un algoritmo común es usar la media o la mediana como el valor imputado. En consecuencia, cuando representas un atributo numérico con puntuación Z, el valor imputado suele ser 0 (porque 0 suele ser el promedio de los puntuación Z).
+Un algoritmo común es usar la media o la mediana como el valor imputado. En consecuencia, cuando representas un atributo numérico con puntuación Z, el valor imputado suele ser 0 (porque 0 suele ser el promedio de la puntuación Z).
 
 Un conjunto de datos ordenado a veces puede simplificar la imputación. Sin embargo, no es una buena idea entrenar en un conjunto de datos ordenado. Por lo tanto, después de la interpolación, aleatoriza el orden de los ejemplos en el conjunto de entrenamiento.
 
@@ -105,7 +105,7 @@ Desventajas:
 - Errar es humano. Por lo tanto, es posible que varios evaluadores humanos deban evaluar los mismos datos.
 
 Piensa en estas preguntas para determinar tus necesidades:
-- ¿Qué tan capacitados deben ser tus evaluadores? (Por ejemplo, ¿los evaluadores deben saber un idioma específico? ¿Necesitas lingüistas para aplicaciones de diálogo o PNL?
+- ¿Qué tan capacitados deben ser tus evaluadores? (Por ejemplo, ¿los evaluadores deben saber un idioma específico? ¿Necesitas lingüistas para aplicaciones de diálogo o PNL?)
 - ¿Cuántos ejemplos etiquetados necesitas? ¿Qué tan pronto los necesitas?
 - ¿Cuál es tu presupuesto?
 
@@ -165,4 +165,259 @@ La reducción del muestreo y el aumento de la ponderación de la clase mayoritar
 - Convergencia más rápida: Durante el entrenamiento, el modelo ve la clase minoritaria con más frecuencia, lo que ayuda a que el modelo converja más rápido.
 
 ## División del conjunto de datos original
+
+Todos los buenos proyectos de ingeniería de software dedican una energía considerable a probar sus apps. Del mismo modo, 
+te recomendamos que pruebes tu modelo de IA para determinar la exactitud de sus predicciones.
+
+### Conjuntos de entrenamiento, validación y prueba
+Debes probar un modelo con un conjunto de ejemplos diferente de los que se usaron para entrenarlo. Realizar pruebas en diferentes 
+ejemplos es una prueba más sólida de la aptitud de tu modelo que realizar pruebas en el mismo conjunto de ejemplos. 
+¿De dónde obtienes esos diferentes ejemplos? Tradicionalmente, en el aprendizaje automático, se obtienen esos diferentes ejemplos
+dividiendo el conjunto de datos original. Por lo tanto, podrías imaginar que debes dividir el conjunto de datos original en dos 
+subconjuntos:
+- Un conjunto de entrenamiento con el que se entrena el modelo.
+- Un conjunto de pruebas para evaluar el modelo entrenado.
+
+Dividir el conjunto de datos en dos conjuntos es una buena idea, pero un mejor enfoque es dividirlo en tres subconjuntos. Además del conjunto de entrenamiento y el conjunto de prueba, el tercer subconjunto es el siguiente:
+- Un conjunto de validación realiza las pruebas iniciales en el modelo a medida que se entrena.
+
+![](Images/3.1%20PartitionThreeSets.png)
+
+Usa el conjunto de validación para evaluar los resultados del conjunto de entrenamiento. Después de que el uso repetido del 
+conjunto de validación sugiera que tu modelo hace buenas predicciones, usa el conjunto de prueba para verificarlo.
+
+En la siguiente figura, se sugiere este flujo de trabajo. En la figura, “Ajustar modelo” significa ajustar cualquier aspecto 
+del modelo, desde cambiar la tasa de aprendizaje, agregar o quitar atributos, hasta diseñar un modelo completamente nuevo desde cero.
+
+![](Images/3.2%20workflow_with_validation_set)
+
+```
+Nota: Cuando transformas un atributo en tu conjunto de entrenamiento, debes realizar la misma transformación en el conjunto de validación, 
+el conjunto de prueba y el conjunto de datos del mundo real.
+```
+El flujo de trabajo que se muestra en la Figura 10 es óptimo, pero incluso con ese flujo de trabajo, los conjuntos de prueba 
+y los conjuntos de validación siguen “desgastándose” con el uso repetido. Es decir, cuanto más uses los mismos datos para tomar 
+decisiones sobre la configuración de los hiperparámetros o sobre otras mejoras del modelo, menos confianza tendrás en que el modelo
+haga buenas predicciones sobre datos nuevos. Por este motivo, es una buena idea recopilar más datos para “actualizar” el conjunto 
+de pruebas y el conjunto de validación. Comenzar de nuevo es un gran restablecimiento.
+
+### Problemas adicionales con las prácticas guiadas
+
+Los ejemplos duplicados pueden afectar la evaluación del modelo. Después de dividir un conjunto de datos en conjuntos de 
+entrenamiento, validación y prueba, borra los ejemplos del conjunto de validación o de prueba que sean duplicados de los
+ejemplos del conjunto de entrenamiento. La única prueba justa de un modelo es con ejemplos nuevos, no con duplicados.
+
+En resumen, un buen conjunto de pruebas o de validación cumple con todos los siguientes criterios:
+- Suficientemente grande para generar resultados de pruebas estadísticamente significativos.
+- Representativo de todo el conjunto de datos. En otras palabras, no elijas un conjunto de prueba con características 
+diferentes a las del conjunto de entrenamiento.
+- Representan los datos del mundo real que el modelo encontrará como parte de su propósito comercial.
+- Cero ejemplos duplicados en el conjunto de entrenamiento.
+
+## Transformar datos en conjuntos de datos
+
+Los modelos de aprendizaje automático solo pueden entrenarse con valores de punto flotante. Sin embargo, muchos atributos 
+del conjunto de datos no son valores de punto flotante de forma natural. Por lo tanto, una parte importante del aprendizaje 
+automático es transformar los atributos que no son de punto flotante en representaciones de punto flotante.
+
+Por ejemplo, supongamos que street names es un atributo. La mayoría de los nombres de las calles son cadenas, como "Broadway" o "Vilakazi".
+Tu modelo no puede entrenarse en “Broadway”, por lo que debes transformar “Broadway” en un número de punto flotante.
+
+Además, incluso debes transformar la mayoría de las funciones de punto flotante. Este proceso de transformación, llamado normalización, 
+convierte los números de punto flotante en un rango limitado que mejora el entrenamiento del modelo.
+
+### Cómo tomar muestras de datos cuando tienes demasiados
+Algunas organizaciones tienen la suerte de contar con una gran cantidad de datos. Cuando el conjunto de datos contiene demasiados ejemplos,
+debes seleccionar un subconjunto de ejemplos para el entrenamiento. Cuando sea posible, selecciona el subconjunto que sea 
+más relevante para las predicciones de tu modelo.
+
+### Ejemplos de filtros que contienen PII
+Los buenos conjuntos de datos omiten los ejemplos que contienen información de identificación personal (PII). Esta política
+ayuda a proteger la privacidad, pero puede influir en el modelo.
+
+## Generalización
+Cuando entrenas un modelo con datos, le estas enseñando a ser bueno con esos datos. Pero estos datos son sólo un subconjunto
+del mundo real. Si el modelo funciona bien en las pruebas pero mal en el mundo real, es que nuestro modelo no generalizó bien.
+En este caso, decimos que el modelo ha sufrido de sobreajuste. Para resolverlo, debes realizar entrenamientos con datos nuevos
+más representativos del mundo real.
+
+## Sobreajuste
+
+Se refiere a la creación de un modelo que coincida (memorice) con el conjunto de entrenamiento de tal manera que no pueda 
+realizar predicciones correctas con datos nuevos. Un modelo sobreajustado es análogo a un invento que funciona bien en el 
+laboratorio, pero que no tiene valor en el mundo real.
+
+```
+Nota: El sobreajuste es un problema común en el aprendizaje automático, no una hipótesis académica.
+```
+
+### Ajuste, sobreajuste y subajuste
+Un modelo debe realizar buenas predicciones sobre datos nuevos. Es decir, tu objetivo es crear un modelo que “se ajuste” 
+a los datos nuevos.
+
+Como viste, un modelo con sobreajuste realiza predicciones excelentes en el conjunto de entrenamiento, pero predicciones 
+deficientes en los datos nuevos. Un modelo con subajuste ni siquiera realiza buenas predicciones en los datos de entrenamiento. 
+Si un modelo sobreajustado es como un producto que funciona bien en el laboratorio, pero mal en el mundo real, un modelo subajustado 
+es como un producto que ni siquiera funciona bien en el laboratorio.
+
+La generalización es lo opuesto al sobreajuste. Es decir, un modelo que generaliza bien realiza buenas predicciones sobre 
+datos nuevos. Tu objetivo es crear un modelo que generalice los datos nuevos de forma correcta.
+
+### Cómo detectar el sobreajuste
+Las siguientes curvas te ayudan a detectar el sobreajuste:
+- curvas de pérdida
+- curvas de generalización
+
+Una curva de pérdida representa la pérdida de un modelo en función de la cantidad de iteraciones de entrenamiento. Un gráfico 
+que muestra dos o más curvas de pérdida se denomina curva de generalización. En la siguiente curva de generalización, se 
+muestran dos curvas de pérdida:
+
+![](Images/3.3%20RegularizationTwoLossFunctions.png)
+
+Observa que las dos curvas de pérdida se comportan de manera similar al principio y, luego, divergen. Es decir, después de 
+una cierta cantidad de iteraciones, la pérdida disminuye o se mantiene constante (converge) para el conjunto de entrenamiento,
+pero aumenta para el conjunto de validación. Esto sugiere un sobreajuste.
+
+En cambio, una curva de generalización para un modelo bien ajustado muestra dos curvas de pérdida que tienen formas similares.
+
+### ¿Qué causa el sobreajuste?
+
+En términos generales, el sobreajuste se debe a uno o ambos de los siguientes problemas:
+- El conjunto de entrenamiento no representa de manera adecuada los datos de la vida real (o el conjunto de validación o 
+el conjunto de prueba).
+- El modelo es demasiado complejo.
+
+### Condiciones de generalización
+
+Un modelo se entrena en un conjunto de entrenamiento, pero la prueba real de su valor es qué tan bien hace predicciones 
+sobre ejemplos nuevos, en particular, sobre datos del mundo real. Mientras desarrollas un modelo, tu conjunto de prueba 
+sirve como proxy para los datos del mundo real. El entrenamiento de un modelo que generalice bien implica las siguientes 
+condiciones del conjunto de datos:
+- Los ejemplos deben ser independientes y estar idénticamente distribuidos, que es una forma elegante de decir que tus 
+ejemplos no pueden influir entre sí.
+- El conjunto de datos es estacionario, lo que significa que no cambia de forma significativa con el tiempo.
+- Las particiones del conjunto de datos tienen la misma distribución. Es decir, los ejemplos del conjunto de entrenamiento
+son estadísticamente similares a los ejemplos del conjunto de validación, el conjunto de prueba y los datos del mundo real.
+
+## Complejidad del modelo
+
+En la unidad anterior, se presentó el siguiente modelo, que categorizó de forma incorrecta muchos árboles en el conjunto de prueba:
+![](Images/3.4%20Complex%20Model.PNG)
+
+El modelo anterior contiene muchas formas complejas. ¿Un modelo más simple manejaría mejor los datos nuevos? Supongamos que 
+reemplazas el modelo complejo por un modelo ridículamente simple: una línea recta.
+
+![](Images/3.5%20Simple%20Model.PNG)
+
+El modelo simple generaliza mejor que el modelo complejo en datos nuevos. Es decir, el modelo simple hizo mejores predicciones
+en el conjunto de prueba que el modelo complejo.
+La simplicidad ha estado superando a la complejidad durante mucho tiempo. De hecho, la preferencia por la simplicidad se 
+remonta a la antigua Grecia. Siglos después, un fraile del siglo XIV llamado Guillermo de Ockham formalizó la preferencia 
+por la simplicidad en una filosofía conocida como navaja de Ockham. Esta filosofía sigue siendo un principio subyacente esencial
+de muchas ciencias, incluido el aprendizaje automático.
+
+```
+Nota: Por lo general, los modelos complejos superan a los simples en el conjunto de entrenamiento. Sin embargo, los modelos
+ simples suelen tener un mejor rendimiento que los complejos en el conjunto de prueba (lo que es más importante).
+```
+
+### Regularización
+
+Los modelos de aprendizaje automático deben cumplir simultáneamente con dos objetivos en conflicto:
+- Se ajustan bien a los datos.
+- Adapta los datos de la forma más sencilla posible.
+
+Un enfoque para mantener un modelo simple es penalizar los modelos complejos, es decir, forzar al modelo a simplificarse 
+durante el entrenamiento. Penalizar los modelos complejos es una forma de regularización.
+
+```
+Una analogía de la regularización: Supón que cada estudiante en una sala de conferencias tuviera un pequeño timbre que 
+emitiera un sonido que molestara al profesor. Los estudiantes presionaban el timbre cada vez que la conferencia del profesor 
+se volvía demasiado complicada. Enojado, el profesor se vería obligado a simplificar la conferencia. El profesor se quejaba: 
+“Cuando simplifico, no soy lo suficientemente preciso”. Los estudiantes responderían: “El único objetivo es explicarlo de manera 
+lo suficientemente simple para que lo entienda”. Gradualmente, los timbres entrenarían al profesor para que dé una conferencia 
+lo suficientemente simple, incluso si no es lo suficientemente precisa.
+```
+
+### Pérdida y complejidad
+
+Hasta ahora, este curso sugirió que el único objetivo durante el entrenamiento era minimizar la pérdida, es decir: $$minimize(loss)$$
+Como viste, los modelos enfocados únicamente en minimizar la pérdida tienden a sobreajustarse. Un mejor algoritmo de optimización del entrenamiento minimiza alguna combinación de pérdida y complejidad:
+$$minimize(loss+complexity)$$
+
+Lamentablemente, la pérdida y la complejidad suelen tener una relación inversa. A medida que aumenta la complejidad, disminuye 
+la pérdida. A medida que disminuye la complejidad, aumenta la pérdida. Debes encontrar un punto medio razonable en el que 
+el modelo realice buenas predicciones en los datos de entrenamiento y en los datos del mundo real. Es decir, tu modelo debe encontrar 
+un compromiso razonable entre la pérdida y la complejidad.
+
+### ¿Qué es la complejidad?
+Ya viste algunas formas diferentes de cuantificar las pérdidas. ¿Cómo cuantificarías la complejidad? Comienza tu exploración 
+con el siguiente ejercicio:
+
+![](Images/3.6%20Complexity%20Exercise.PNG)
+## Regularización L2
+Es una métrica de regularización popular que usa la siguiente fórmula: $$L_2Regularacion = w_1^2+w_2^2+..+w_n^n$$
+
+Observa que los pesos cercanos a cero no afectan mucho la regularización L2, pero los pesos grandes pueden tener un gran impacto. 
+La regularización L2 ayuda a reducir el tamaño de los pesos hacia 0, pero nunca los lleva a cero.
+
+### Tasa de regularización (lambda)
+Como se mencionó, el entrenamiento intenta minimizar alguna combinación de pérdida y complejidad: $$minimize(loss+complexity)$$
+
+Los desarrolladores de modelos ajustan el impacto general de la complejidad en el entrenamiento de modelos multiplicando 
+su valor por un escalar llamado tasa de regularización. El carácter griego lambda suele simbolizar la tasa de regularización.
+
+Es decir, los desarrolladores de modelos intentan hacer lo siguiente: $$minimize(loss+\lambda complexity)$$
+
+Una tasa de regularización alta:
+- Fortalece la influencia de la regularización, lo que reduce las posibilidades de sobreajuste.
+- Tiende a producir un histograma de pesos del modelo con las siguientes características:
+    - una distribución normal
+    - un peso medio de 0
+
+Una tasa de regularización baja:
+- Disminuye la influencia de la regularización, lo que aumenta las posibilidades de sobreajuste.
+- Tiende a producir un histograma de pesos del modelo con una distribución plana.
+
+```
+Nota: Si estableces la tasa de regularización como cero, quitarás la regularización por completo. En este caso, el entrenamiento
+se enfoca exclusivamente en minimizar la pérdida, lo que plantea el mayor riesgo posible de sobreajuste.
+```
+
+### Cómo elegir la tasa de regularización
+
+La tasa de regularización ideal produce un modelo que se generaliza bien a datos nuevos que no se vieron antes. Desafortunadamente, 
+ese valor ideal depende de los datos, por lo que debes realizar algunos ajuste.
+
+### Interrupción anticipada: Una alternativa a la regularización basada en la complejidad
+
+La **interrupción anticipada** es un método de regularización que no implica un cálculo de complejidad. En cambio, la 
+interrupción anticipada simplemente significa finalizar el entrenamiento antes de que el modelo converja por completo. Por ejemplo, 
+finalizas el entrenamiento cuando la curva de pérdida del conjunto de validación comienza a aumentar (la pendiente se vuelve positiva).
+
+Si bien la interrupción anticipada suele aumentar la pérdida de entrenamiento, puede disminuir la pérdida de prueba.
+
+La interrupción anticipada es una forma de regularización rápida, pero rara vez óptima. Es muy poco probable que el modelo 
+resultante sea tan bueno como un modelo entrenado por completo con la tasa de regularización ideal.
+
+### Cómo encontrar el equilibrio entre la tasa de aprendizaje y la tasa de regularización
+
+Tasa de aprendizaje y tasa de regularización tienden a mover los pesos en direcciones opuestas. Una tasa de aprendizaje 
+alta suele alejar los pesos de cero; una tasa de regularización alta acerca los pesos a cero.
+
+Si la tasa de regularización es alta con respecto a la tasa de aprendizaje, los pesos débiles tienden a producir un modelo 
+que realiza predicciones deficientes. Por el contrario, si la tasa de aprendizaje es alta con respecto a la tasa de regularización,
+los pesos fuertes tienden a producir un modelo con sobreajuste.
+
+Tu objetivo es encontrar el equilibrio entre la tasa de aprendizaje y la tasa de regularización. Esto puede ser un desafío. 
+Lo peor de todo es que, una vez que encuentres ese equilibrio elusivo, es posible que debas cambiar la tasa de aprendizaje. 
+Y, cuando cambies la tasa de aprendizaje, deberás volver a encontrar la tasa de regularización ideal.
+
+
+## Cómo interpretar las curvas de pérdidas
+El aprendizaje automático sería mucho más sencillo si todas tus curvas de pérdida se vieran así la primera vez que entrenas tu modelo:
+
+![](Images/3.7%20Perfect%20Learning%20Curve.PNG)
+
+Lamentablemente, las curvas de pérdidas suelen ser difíciles de interpretar. 
 
