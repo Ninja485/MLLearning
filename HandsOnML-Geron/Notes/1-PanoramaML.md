@@ -228,7 +228,7 @@ una bajada de rendimiento significativa. Otro consejo es monitorear los datos de
 ### Instance-Based vs Model-Based Learning
 
 Otra forma de clasificar los sistemas de ML es por como generalizan. La mayoría de tareas del ML son sobre predicciones. Es decir, predecir la salida
-de una instancia que nunca ha visto inferiendola de las instancias existentes a través del entrenamiento. Tener buen rendimiento en la evaluación es bueno,
+de una instancia que nunca ha visto a partir de las instancias existentes a través del entrenamiento. Tener buen rendimiento en la evaluación es bueno,
 pero nuestro objetivo principal es realizar buenas predicciones.
 
 Hay dos enfoques a la hora de generalizar:
@@ -344,7 +344,7 @@ denominada *feature engineering*, que requiere los siguientes pasos:
 ### Problemas relativos a Malos Modelos
 #### Overfitting al conjunto de entrenamiento
 
-Ocurre cuando el modelo rinde bien en el conjunto de entrenamiento, pero no generaliza bien. La cause principal es que el modelo
+Ocurre cuando el modelo rinde bien en el conjunto de entrenamiento, pero no generaliza bien. La causa principal es que el modelo
 es demasiado complejo comparada con la cantidad y presencia de ruido en los datos de entrenamiento. Algunas soluciones son:
 - Simplificar el modelo, eligiendo uno con menos parámetros, reducir el número de atributos o definiendo restricciones al modelo.
 - Obtener más datos de entrenamiento.
@@ -352,7 +352,7 @@ es demasiado complejo comparada con la cantidad y presencia de ruido en los dato
 
 Restringir el modelo para hacerlo más simple y reducir el riesgo de overfitting se denomina *regularization*. P.e, el modelo linear
 que definimos antes tiene dos parámetros. Esto da al algoritmo dos grados de libertad para adaptar al modelo al conjunto de entrenamiento.
-Si forzáramos $\theta_0=0 $ solo tendríamos un grado de libertad, por lo que sería mas difícil ajustarse a los datos de entrenamiento. También podríamos
+Si forzáramos $\theta_0=0 $ solo tendríamos un grado de libertad, por lo que sería más difícil ajustarse a los datos de entrenamiento. También podríamos
 acotar el valor de $\theta_1$ para tener algo entre 1 y 2 grados de libertad. Nuestro objetivo es buscar un balance de ajustes para mejorar el rendimiento.
 
 La cantidad de regularización aplicada durante el aprendizaje puede ser controlada por un *hiperparámetro*. Un hiperparámetro es un parámetro
@@ -365,6 +365,118 @@ Algunas soluciones a este problema son:
 - Seleccionar un modelo más potente con más parámetros.
 - Alimentar con mejores atributos al algoritmo de aprendizaje(feature engineering).
 - Reducir las restricciones del modelo(p.e reduciendo la regularización de hiperparámetros)
+
+### Resumen
+
+En resumen, hasta ahora hemos visto:
+- ML es conseguir que las máquinas rindan mejor en una tarea aprendiendo de los datos, en vez de codificar reglas explícitamente.
+- Hay muchos tipos de ML: supervised or not, batch or online, instance-based or model-based.
+- En un proyecto de ML, reunes datos en un conjunto de entrenamiento, que luego alimentas a un algoritmo de aprendizaje. Si el 
+algoritmo es model-based, ajusta algunos parámetros para encajar el modelo con el conjunto de entrenamiento(para al menos rendir 
+bien en el entrenamiento), y esperas que rinda bien en nuevos datos. Si el algoritmo es instance-based, aprende de corazón y generaliza
+a nuevas instancias usando una medida de similitud para compararlos con los datos aprendidos.
+- El sistema no rendirá bien si el conjunto de entrenamiento es muy pequeño, o si los datos no son representativos, presentan ruido,
+o están contaminados con atributos irrelevantes. Por último, tu modelo no necesita ser ni demasiado simple(ocurrirá underfitting) o demasiado
+complejo(causará overfitting).
+
+
 ## Testeo y validación
 
+La única manera de saber si nuestra modelo será bueno con nuevos datos es probarlo con nuevos datos. Una manera es ponerlo en producción
+y monitorizar como de bien lo hace. Esto funciona bien, pero si rinde mal recibirás muchas quejas de los usuarios.
+
+Una mejor alternativa es **dividir el conjunto de datos** en dos conjuntos: *training set* y *test set*. Training set lo usas
+para entrenar el modelo, y el test set para evaluarlo. El *ratio de error(error rate)* en los nuevos casos es denominada el
+*generalization error (or out-of-sample error)*, y evaluando tu modelo con el conjunto de entrenamiento consigues una estimación 
+de este error. Esta métrica te contará como de bien tu modelo rendirá en casos que nunca ha visto.
+
+Si el error de entrenamiento es bajo, pero el de validación es alto, quiere decir que tu modelo se está sobreajustando(overfitting)
+a tus datos de entrenamiento.
+
+> Lo común es usar una división 80/20 para los conjuntos de entrenamiento y testeo. Aunque esto depende del tamaño del conjunto de datos,
+> si tienes muchos, p.e 10 millones, con 100.000 ejemplos de prueba serán suficientes para validar.
+
+### Ajuste de Hiperparámetros y selección del Modelo
+
+Una manera de elegir entre dos modelos es entrenar ambos y probarlos. Luego te interesaría probar distintas configuraciones de 
+hiperparámetros para evitar overfitting. Encuentras el mejor modelo con la mejor configuración de hiperparámetros, pero al estar
+en producción rinde peor de lo esperado. El problema es que hemos creado un tipo de overfitting al test set, por lo que con nuevos datos
+lo más posible que no rinda tan bien.
+
+Una solución a este problema es *holdout validation*. Apartas parte del conjunto de entrenamiento para evaluar múltiples modelos candidato
+y elegir el mejor. El nuevo conjunto apartado se conoce como *validation set (or the development set, or dev set).* Por tanto nos queda un flujo como 
+el siguiente:
+- Entrenas múltiples modelos con diferentes hiperparámetros en el conjunto de entrenamiento reducido
+- Seleccionas el modelo que mejor rinde en el conjunto de validación(dev set).
+- Entrenas el mejor modelo con el conjunto de entrenamiento completo(Reduced Training set + Dev Set), consiguiendo el modelo final.
+- Evalúas el modelo final con el test set para conseguir una estimación del error de generalización.
+
+![](../Images/1.1-mls3_0125.png)
+
+Si el conjunto de validación es demasiado pequeño, la evaluación del modelo será imprecisa, y podrías acabar eligiendo un modelo subóptimo. Y al contrario,
+si el conjunto de validación es demasiado grande, estás dejando un conjunto de entrenamiento demasiado pequeño, lo que es malo. Una manera de
+resolver estos problemas es realizando repetidas *validaciones cruzadas(cross-validation)*, usando muchos conjuntos de validación pequeños.
+
+Cross validation consiste en crear múltiples configuraciones de conjuntos de entrenamiento y validación para evaluar más exhaustivamente 
+los modelos. Entonces usamos el promedio de los distintos experimentos para compararlos, lo que nos dará una medida de rendimiento más precisa.
+El inconveniente es que tienes que realizar múltiples experimentos, lo que conlleva múltiples entrenamientos y evaluaciones.
+
+### Data Mismatch
+
+A veces, es fácil obtener muchos datos, pero estos no son representativos completamente de los datos usados en producción. P.e, los
+datos de entrada pueden estar incompletos en algunos campos. Es importante que los conjuntos de validación y testeo sean lo más
+parecido posible a los datos que esperas recibir en producción. Por lo que es recomendable recopilar datos parecidos a los de producción.
+Pero si insertas estos datos en los conjuntos de validación y testeo, no sabrás bien si el modelo rinde mal porque ha ocurrido overfit en el 
+conjunto de entrenamiento o por la diferencia entre datos de laboratorio y reales.
+
+Una solución a este problema es definir otro conjunto de los datos de entrenamiento, el *train-dev set*. Después de que el modelo sea entrenado con el conjunto de
+entrenamiento, tu puedes evaluarlo en el train-dev set. Si el modelo rinde mal es porque se ha producido overfitting con el conjunto de entrenamiento,
+por lo que deberías obtener más datos de entrenamiento y limpiarlos. Por el contrario, si rinde bien, puedes evaluarlo con el dev set con ejemplos de producción.
+Si rinde mal, el problema es el data mismatch. Una vez que tienes un modelo que rinde bien en ambos(train-dev set y the dev set), puedes 
+evaluarlo una última vez con el test set para saber como de bien irá en producción.
+
+### Teorema No Free Lunch (NFL)
+
+- Un modelo es una representación simplificada de los datos: descarta detalles superfluos que probablemente no generalicen a nuevas instancias.
+- Elegir un tipo de modelo implica asumir algo sobre los datos (p. ej., un modelo lineal asume que los datos son esencialmente lineales y que la distancia a la recta es solo ruido).
+- **Wolpert (1996):** si no se asume nada sobre los datos, no hay motivo para preferir un modelo sobre otro. Ningún modelo es mejor *a priori*.
+- Según el dataset, lo mejor puede ser un modelo lineal o una red neuronal.
+- Lo ideal sería evaluarlos todos, pero no es viable.
+- **En la práctica:** se hacen suposiciones razonables sobre los datos y se evalúan solo unos pocos modelos adecuados:
+  - Tareas simples → modelos lineales con distintos niveles de regularización.
+  - Problemas complejos → varias redes neuronales.
+
 ## Ejercicios
+
+1. ¿Cómo definirías ML?
+   - ML es un paradigma de programación en él que la propia máquina aprende los patrones subyacentes de los datos para resolver una tarea de forma satisfactoria. Contraste
+   con el paradigma tradicional en el cual un programador define reglas fijas que una máquina ejecuta para producir la salida.
+2. ¿Puedes nombrar 4 tipos de aplicaciones en los que brilla?
+  - Predicción de valores en bolsa.
+  - Predicción meteorológica.
+  - Análisis del lenguaje, pasar el habla a texto.
+  - Generar arte inspirado en el impresionismo.
+3. ¿Qué es un conjunto de datos etiquetados?
+  - Conjunto de datos en los que tenemos la solución incluida para las entradas.
+4. ¿Cuáles son las dos tareas principales del entrenamiento supervisado?
+  - Clasificación
+  - Predicción
+5. ¿Puedes nombrar 4 tareas típicas del entrenamiento no supervisado?
+  - Agrupación
+  - Identificación de anomalías
+  - Identificación de novedades
+  - Representación gráfica de datos
+6. ¿Qué tipo de algoritmo seleccionarías para que un robot camine en un terreno desconocido?
+  - Aprendizaje por refuerzo para que aprenda la mejor política para navegar por el terreno.
+7. ¿Que tipo de algoritmo usarías para segmentar tus clientes en múltiples grupos?
+  - Un algoritmo de clustering en general. Podría ir desde entrenamiento supervisado(si tenemos los grupos acotados e incluidos en los datos de entrenamiento),
+  a no supervisado(simplemente queremos los distintos grupos separados), a semi-supervised learning(grupos + luego los etiquetamos).
+8. ¿Definirías el problema de detección de spam como entrenamiento supervisado o no supervisado?
+9. ¿Qué es un sistema basado en online learning?
+ - Es cuando el sistema puede aprender de forma incremental de los datos nuevos. Es decir, no simplemente se entrena una vez y ya. Si no que se puede entrenar de 
+  forma dinámica con nuevos datos que fuesen llegando al sistema.
+10. ¿Que es out-of-core learning?
+  - Técnica usada para cuando los datos no entran en la memoria principal de la máquina. Se dividen en múltiples máquinas, y el sistema va cargando los múltiples datos
+  tras procesarlos y usarlos en el entrenamiento hasta que haya acabado.
+11. ¿Que tipo de algoritmos confían en una medida de similitud para hacer predicciones?
+  - Instance-based models, o algoritmos basado en instancias.
