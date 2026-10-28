@@ -472,6 +472,7 @@ evaluarlo una última vez con el test set para saber como de bien irá en produc
   - Un algoritmo de clustering en general. Podría ir desde entrenamiento supervisado(si tenemos los grupos acotados e incluidos en los datos de entrenamiento),
   a no supervisado(simplemente queremos los distintos grupos separados), a semi-supervised learning(grupos + luego los etiquetamos).
 8. ¿Definirías el problema de detección de spam como entrenamiento supervisado o no supervisado?
+  - Supervisado, ya que las entradas tienen una etiqueta indicando si es o no spam.
 9. ¿Qué es un sistema basado en online learning?
  - Es cuando el sistema puede aprender de forma incremental de los datos nuevos. Es decir, no simplemente se entrena una vez y ya. Si no que se puede entrenar de 
   forma dinámica con nuevos datos que fuesen llegando al sistema.
@@ -480,3 +481,27 @@ evaluarlo una última vez con el test set para saber como de bien irá en produc
   tras procesarlos y usarlos en el entrenamiento hasta que haya acabado.
 11. ¿Que tipo de algoritmos confían en una medida de similitud para hacer predicciones?
   - Instance-based models, o algoritmos basado en instancias.
+12. ¿Cuál es la diferencia entre parámetro e hiperparámetro de un modelo?
+ - El parámetro son los valores que el modelo aprende para ajustar los datos de entrenamiento a la salida. Mientras que el hiperparámetro sirve para configurar 
+  el algoritmo aplicado por el modelo.
+13. ¿Qué buscan los algoritmos model-based? ¿Cuál es la estrategia más común para triunfar? ¿Cómo hacen predicciones?
+  - Los algoritmos model-based usan una función para determinar la salida en vez de comparar similitud de ejemplos como los instance-based. Para hacer predicciones, simplemente aprenden
+  los parámetros(pesos) de los distintos atributos para la salida, y entonces pasan los atributos del dato a predecir, consiguiendo una salida de la función.
+14. ¿Puedes nombrar cuatro retos de ML?
+  - Insuficientes Datos, es el motor principal de ML, sin datos no rendirá bien.
+  - Datos no representativos, uso de datos inadecuados que no representan la relación del problema con su solución o sesgados por distribución.
+  - Overfitting, ocurre cuando el modelo es demasiado complejo y se ajusta al conjunto de entrenamiento. Suele rendir bien en entrenamiento, pero mal en el resto.
+  - Underfitting, ocurre cuando el modelo es demasiado simple. Sintomas son rendir mal tanto en entrenamiento como en evaluación.
+15. Si tu modelo rinde bien en los datos de entrenamiento pero generaliza mal para nuevos datos. ¿Qué esta pasando?¿Podrías nombrar 3 soluciones?
+  - Esta ocurriendo overfitting al conjunto de entrenamiento. Podriamos incluir más datos que sean más representativos del mundo real para mejorar las predicciones, podríamos
+  definir restricciones al modelo(p.e en una función linear determinar de forma fija el sesgo inicial $\omega_0$), o elegir un modelo más simple(función cuadrática en vez de exponente 3).
+16. ¿Qué es un test set y por qué quieres usarlo?
+  - Es un conjunto que sirve para evaluar el modelo antes de lanzarlo a producción. Te puede interesar para comparar distintos modelos con distintos hiperparámetros y mejorar el rendimiento.
+17. ¿Cuál es el proposito de validation set?
+  - Es un conjunto especial de pruebas para evitar el overfitting al test set que ocurre al entrenar múltiples modelos para elegir el mejor.
+18. ¿Qué es el train-dev set, cuándo lo necesitas, y cómo lo usas?
+  - Es un subconjunto del conjunto de datos de entrenamiento original que sirve para distinguir si el problema de nuestro sistema es por Data 
+  mismatch o por overfitting. Si no lo hacemos y vemos mal rendimiento, no podríamos saber bien la causa. Si rinde mal en este conjunto,
+  se está produciendo overfitting y no necesitamos continuar el pipeline después de evaluar el entrenamiento.
+19. Qué puede ir mal si usas el test set para ajustar hiperparámetros?
+  - Overfitting al test set, por ello usamos el validation set.
